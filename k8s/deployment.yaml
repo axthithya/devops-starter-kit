@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: starter-app
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: starter-app
+
+  template:
+    metadata:
+      labels:
+        app: starter-app
+
+    spec:
+      containers:
+        - name: starter-app
+          image: axthithya/devops-starter-kit:v1
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
