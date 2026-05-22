@@ -1,4 +1,4 @@
-# DevOps Starter Kit
+# DevOps Starter Kit-
 
 A complete beginner-friendly DevOps project using:
 
@@ -9,18 +9,18 @@ A complete beginner-friendly DevOps project using:
 - DockerHub
 - GitHub Actions CI/CD
 
-## Features
+## Features-
 
 - Containerized Java application
 - Kubernetes deployment
 - DockerHub image registry
 - Automated CI pipeline using GitHub Actions
 
-## Tech Stack
+## Tech Stack-
 
 - Java 21
 - Spring Boot
 - Docker
 - Kubernetes
 - Minikube
-- GitHub Actions
+- GitHub Actions..
