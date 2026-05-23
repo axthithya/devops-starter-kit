@@ -24,3 +24,4 @@ A complete beginner-friendly DevOps project using:
 - Kubernetes
 - Minikube
 - GitHub Actions..
+Updated SonarCloud integration
