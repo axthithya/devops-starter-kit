@@ -6,41 +6,169 @@
 ![GitOps](https://img.shields.io/badge/GitOps-ArgoCD-ef7b4d)
 ![Quality](https://img.shields.io/badge/Quality-SonarCloud-4e9bcd)
 
-A production-inspired DevOps starter platform for Spring Boot applications. It gives you a working path from local development to container build, quality scan, DockerHub publish, Helm deployment, and ArgoCD GitOps sync on Kubernetes.
+A beginner-friendly DevOps starter platform for Spring Boot applications.
 
-The goal is to make the DevOps path visible without asking you to understand every tool on day one.
+It shows the full path from code to container image to Kubernetes deployment using GitHub Actions, DockerHub, Helm, ArgoCD, and Minikube. You can first run the demo exactly as-is, then connect your own accounts and application when you are ready.
 
-The fastest local demo path is:
+## 🚀 Quick Start
 
-```text
+There are two phases:
+
+| Phase | Goal | You need accounts? |
+| --- | --- | --- |
+| **Phase 1: Check your machine** | Make sure your system can run the DevOps stack correctly | No |
+| **Phase 2: Use your own project** | Turn the starter kit into your real CI/CD and GitOps workflow | Yes |
+
+Phase 1 is only about testing the platform on your machine. The default demo image and config are enough.
+
+Phase 2 is where you connect GitHub Actions, DockerHub, optional SonarCloud scanning, and your own Spring Boot app so deployments happen from Git.
+
+---
+
+### Phase 1: Local Demo
+
+This phase checks that your machine has everything needed to run the DevOps platform correctly.
+
+It will:
+
+- Validate the required tools.
+- Start local Kubernetes with Minikube.
+- Install ArgoCD, which keeps Kubernetes in sync with Git.
+- Deploy the demo application automatically.
+- Prove Docker, Kubernetes, Helm, ArgoCD, and GitOps work together on your machine.
+
+#### 1. Clone the repository
+
+```bash
 git clone https://github.com/axthithya/devops-starter-kit.git
 cd devops-starter-kit
 cp .env.example .env
+```
+
+For the first run, leave `.env` unchanged. You do not need your own GitHub repository, DockerHub image, or SonarCloud project yet.
+
+> 🛠️ **First time setting up DevOps tools?**
+>
+> If `make setup` reports missing dependencies like Docker, kubectl, Helm, or Minikube, follow the [Dependency Installation Guide](./DEPENDENCIES.md). It walks through the Ubuntu setup commands one tool at a time.
+
+#### 2. Prepare the local DevOps stack
+
+```bash
 make setup
+```
+
+What this does: checks your tools, starts Minikube, installs ArgoCD, and registers the demo app.
+
+Why you run it: this prepares a local Kubernetes environment without asking you to wire everything together by hand.
+
+Success means you see:
+
+```text
+OK  Setup completed
+```
+
+#### 3. Verify everything is healthy
+
+```bash
 make verify
+```
+
+What this does: checks Docker, Kubernetes, ArgoCD, the app deployment, and the app service.
+
+Why you run it: this proves the DevOps stack is working correctly on your machine.
+
+Success means you see:
+
+```text
+OK  All health checks passed
+```
+
+If ArgoCD is still syncing, wait a minute and run `make verify` again.
+
+#### 4. Open the demo app
+
+```bash
 make open-app
 ```
 
-For the first run, clone this repository directly. You do not need to create a new GitHub repository, DockerHub image, or SonarCloud project before trying the starter kit locally. The demo image and default configuration are enough to validate the platform.
+What this does: prints the local URL for the app running inside Kubernetes.
 
-## Architecture
+Why you run it: this proves you can reach the deployed application through the local Kubernetes service.
 
-```mermaid
-flowchart LR
-    Dev[Developer] --> Git[GitHub Repository]
-    Git --> Actions[GitHub Actions CI/CD]
-    Actions --> Maven[Maven Build and Tests]
-    Actions --> Sonar[SonarCloud Analysis]
-    Actions --> Docker[Docker Image Build]
-    Docker --> Hub[DockerHub]
-    Actions --> Values[Update Helm Image Tag]
-    Values --> Git
-    Argo[ArgoCD] --> Git
-    Argo --> Helm[Helm Chart]
-    Helm --> K8s[Kubernetes / Minikube]
-    Hub --> K8s
-    K8s --> App[Spring Boot App]
+Open the printed `Application URL` in your browser.
+
+✅ At this point, your local DevOps environment is ready.
+
+---
+
+### Phase 2: Your Real Project
+
+This phase turns the starter kit into your own real CI/CD and GitOps workflow.
+
+You will connect your own GitHub repository, DockerHub image, optional SonarCloud project, and application code. After that, a normal `git push` can build, publish, and deploy your app.
+
+#### 5. Connect your own accounts
+
+| Account or setting | What it enables |
+| --- | --- |
+| GitHub repository | Gives GitHub Actions a place to run CI/CD for your code |
+| GitHub Secrets | Stores private tokens safely for the workflow |
+| DockerHub | Stores the Docker image that Kubernetes will run |
+| SonarCloud | Adds optional code quality scanning |
+
+Point your clone at your own repository:
+
+```bash
+git remote set-url origin https://github.com/<your-github-username>/<your-repository>.git
 ```
+
+Then update `.env` with your repository and image values:
+
+```bash
+GIT_REPO_URL=https://github.com/<your-github-username>/<your-repository>.git
+DOCKERHUB_USERNAME=<your-dockerhub-username>
+DOCKER_IMAGE_NAME=devops-starter-kit
+SONAR_ORGANIZATION=your-sonarcloud-organization
+SONAR_PROJECT_KEY=your-sonarcloud-project-key
+```
+
+Refresh ArgoCD after changing `.env`:
+
+```bash
+make deploy
+```
+
+For the full GitHub Secrets and variables list, see [Quick Start: Connect your own accounts](QUICKSTART.md#5-connect-your-own-accounts).
+
+#### 6. Replace the demo app later
+
+The starter application lives in `app/`. Keep it while learning, then replace it with your own Spring Boot app when you are ready.
+
+Short version:
+
+- `app/Dockerfile` tells Docker how to package the app.
+- `helm/starter-app/` tells Kubernetes how to run the app.
+- `.env` gives the local scripts your app, namespace, and image values.
+
+#### 7. Deploy from git push
+
+The flow is:
+
+```text
+code change -> git push -> GitHub Actions -> Docker image -> ArgoCD -> Kubernetes deployment
+```
+
+GitHub Actions builds and tests the app. If DockerHub is configured, it publishes a Docker image. ArgoCD then watches Git and keeps Kubernetes updated with the desired image and Helm settings.
+
+See the [CI/CD Flow explanation](ARCHITECTURE.md#cicd-flow) for the beginner-friendly version of what happens after a push.
+
+## Helpful Guides
+
+| Guide | When to use it |
+| --- | --- |
+| [Quick Start](QUICKSTART.md) | You want a slower, step-by-step first run |
+| [Dependency Installation Guide](DEPENDENCIES.md) | `make setup` says Docker, kubectl, Helm, Minikube, Git, or Java is missing |
+| [Architecture Overview](ARCHITECTURE.md) | You want to understand ArgoCD, GitOps, Helm, and the CI/CD flow |
 
 ## Screenshots
 
@@ -48,7 +176,7 @@ flowchart LR
 | --- | --- |
 | ![Local setup terminal](docs/screenshots/local-setup.svg) | ![ArgoCD healthy app](docs/screenshots/argocd-health.svg) |
 
-## Tech Stack
+## 🧰 Tech Stack
 
 | Layer | Tooling |
 | --- | --- |
@@ -61,315 +189,66 @@ flowchart LR
 | Local cluster | Minikube |
 | Automation | Bash scripts, Makefile |
 
-## Repository Layout
+## 📁 Repository Layout
 
 ```text
 .
 |-- app/                    # Spring Boot application and Dockerfile
-|-- argocd/                 # ArgoCD Application reference and generated manifest target
+|-- argocd/                 # ArgoCD Application template and generated manifest
 |-- helm/starter-app/       # Reusable Spring Boot Helm chart
 |-- scripts/                # Setup, validation, bootstrap, health, cleanup
 |-- docs/screenshots/       # README visual assets
 |-- .github/workflows/      # GitHub Actions pipeline
-|-- .env.example            # Copyable local configuration with runnable demo defaults
+|-- .env.example            # Copyable local configuration with demo defaults
+|-- ARCHITECTURE.md         # Beginner-friendly architecture and CI/CD overview
 |-- DEPENDENCIES.md         # Ubuntu dependency installation guide
+|-- QUICKSTART.md           # Detailed first-run and account setup guide
 |-- Makefile                # Beginner-friendly command surface
 `-- README.md
 ```
 
-## Quickstart
+## 🛠️ Make Commands
 
-There are two phases:
-
-1. **Phase 1 validates the platform locally.** This proves your machine can run Docker, Kubernetes, ArgoCD, Helm, and the demo app together.
-2. **Phase 2 connects your own accounts and application.** This turns the starter kit into your own CI/CD and GitOps workflow.
-
-If your system does not already have the required DevOps tools installed, 
-follow the [Dependency Installation Guide](DEPENDENCIES.md) first.
-
-### Phase 1: Local Demo / Platform Validation
-
-Use this phase when you are trying the project for the first time.
-
-This phase is mainly to:
-
-- Validate the DevOps platform.
-- Verify your local machine can run the required tools.
-- Prove that Kubernetes, ArgoCD, Helm, and GitOps can work together.
-
-No account customization is needed yet. You can leave the demo Docker image, app name, namespace, and SonarCloud placeholders as they are.
-
-#### 1. Clone this repository
-
-```bash
-git clone https://github.com/axthithya/devops-starter-kit.git
-cd devops-starter-kit
-cp .env.example .env
-```
-
-The `.env` file is your local settings file. For the first local demo, leave it unchanged. The scripts use your clone's `origin` remote for ArgoCD and the public demo image for Kubernetes:
-
-```bash
-GIT_REPO_URL=
-DOCKERHUB_USERNAME=axthithya
-DOCKER_IMAGE_NAME=devops-starter-kit
-APP_NAME=starter-app
-APP_NAMESPACE=starter-app
-```
-
-Only edit `.env` now if you already know your own DockerHub, GitHub, app, namespace, or SonarCloud values. SonarCloud placeholders are allowed for local setup and only matter when you enable CI quality scanning later.
-
-#### 2. Prepare the local platform
-
-```bash
-make setup
-```
-
-- What it does: Automatically prepares a local Kubernetes environment on your machine.
-- Why you run it: This creates the local DevOps stack so you do not have to install ArgoCD or register the app by hand.
-- What happens on your machine: It checks your tools, starts the `devops-starter-kit` Minikube profile, creates Kubernetes namespaces, installs ArgoCD, and registers the starter app.
-- What success means: The command finishes with `OK  Setup completed`.
-- What you learn/prove: Your machine can start the local Kubernetes platform and connect the starter app to ArgoCD.
-
-A successful run ends like this:
-
-```text
-OK  Setup completed
-```
-
-ArgoCD may need a minute or two to sync the app after setup finishes.
-
-#### 3. Verify and open the demo app
-
-```bash
-make verify
-```
-
-- What it does: Checks whether the local DevOps stack is healthy.
-- Why you run it: This helps verify your system can run the DevOps stack correctly after setup.
-- What happens on your machine: It checks Docker, Kubernetes, ArgoCD, the ArgoCD Application, the app deployment, the app service, and the workflow file.
-- What success means: The command finishes with `OK  All health checks passed`.
-- What you learn/prove: If this succeeds, your Docker, Kubernetes, ArgoCD, and GitOps setup is healthy.
-
-If ArgoCD is still syncing, wait a minute and run `make verify` again.
-
-```bash
-make open-app
-```
-
-- What it does: Prints the local URL for the running demo app.
-- Why you run it: This gives you the browser link for the application that Kubernetes is running.
-- What happens on your machine: It asks Minikube for the app service URL. If Minikube cannot print one automatically, it shows a `kubectl port-forward` fallback command.
-- What success means: You see an `Application URL`, and opening it shows the starter app response.
-- What you learn/prove: Traffic can reach the app through the local Kubernetes service.
-
-At this point, Phase 1 is complete. You have proved that the local DevOps platform works before adding any personal accounts.
-
-### Phase 2: Use the Platform for Your Own Application
-
-Use this phase when you are ready to connect your own repository, publish your own Docker image, and deploy your own app changes from Git.
-
-#### 4. Connect your own accounts
-
-The starter kit is directly usable from this clone, but external users cannot push to the original `axthithya/devops-starter-kit` repository. When you are ready to run CI/CD for your own copy, create a GitHub repository or fork, then point your local clone and `.env` at it:
-
-```bash
-git remote set-url origin https://github.com/<your-github-username>/<your-repository>.git
-```
-
-Edit `.env`:
-
-```bash
-GIT_REPO_URL=https://github.com/<your-github-username>/<your-repository>.git
-DOCKERHUB_USERNAME=<your-dockerhub-username>
-DOCKER_IMAGE_NAME=devops-starter-kit
-SONAR_ORGANIZATION=your-sonarcloud-organization
-SONAR_PROJECT_KEY=your-sonarcloud-project-key
-```
-
-Run this after changing `.env` so ArgoCD watches your repository and image:
-
-```bash
-make deploy
-```
-
-Account setup is what turns the local demo into your own pipeline:
-
-| Account or setting | What it enables |
+| Command | What it does |
 | --- | --- |
-| GitHub repository | Gives GitHub Actions a place to run CI/CD for your code |
-| GitHub Secrets | Stores private tokens safely for the workflow |
-| DockerHub | Stores the Docker image that Kubernetes will run |
-| SonarCloud | Adds optional code quality scanning |
+| `make setup` | Checks dependencies, starts Minikube, installs ArgoCD, and deploys the demo app |
+| `make verify` | Checks Docker, Kubernetes, ArgoCD, and the app health |
+| `make open-app` | Prints the local URL for the deployed app |
+| `make deploy` | Refreshes the ArgoCD Application after `.env` changes |
+| `make minikube` | Starts or verifies the Minikube profile |
+| `make argocd` | Installs or verifies ArgoCD and applies the Application |
+| `make cleanup` | Removes app resources while keeping Minikube |
+| `make cleanup-all` | Removes the app, ArgoCD, and the Minikube profile |
+| `make test` | Runs Maven verification for the Spring Boot app |
+| `make docker-build` | Builds the Docker image locally using `.env` values |
+| `make helm-template` | Renders the Helm chart locally using `.env` values |
 
-In GitHub, open `Settings -> Secrets and variables -> Actions`.
-
-Also open `Settings -> Actions -> General -> Workflow permissions` and select `Read and write permissions`. This allows the pipeline to commit the new Helm image tag for ArgoCD.
-
-Add these repository secrets:
-
-| Secret | What it enables |
-| --- | --- |
-| `DOCKER_USERNAME` | Lets GitHub Actions sign in to DockerHub |
-| `DOCKER_PASSWORD` | Lets GitHub Actions publish your Docker image |
-| `SONAR_TOKEN` | Lets GitHub Actions run SonarCloud analysis, only if you use SonarCloud |
-
-Add these repository variables:
-
-| Variable | Required | Example |
-| --- | --- | --- |
-| `SONAR_ORGANIZATION` | Only for SonarCloud | `my-sonar-org` |
-| `SONAR_PROJECT_KEY` | Only for SonarCloud | `my-org_my-repo` |
-| `DOCKER_IMAGE_NAME` | No | `devops-starter-kit` |
-| `DOCKERHUB_REPOSITORY` | No | `my-dockerhub-user/devops-starter-kit` |
-| `SONAR_HOST_URL` | No | `https://sonarcloud.io` |
-| `UPDATE_HELM_IMAGE_TAG` | No | `true` |
-
-If DockerHub secrets are missing, CI still builds and tests the app but skips Docker publish and GitOps tag updates. If SonarCloud values are missing, CI skips the SonarCloud scan with a warning.
-
-#### 5. Replace the demo app with your own app
-
-The starter application lives in `app/`. You can keep it while learning the platform, then replace it later with your own Spring Boot application.
-
-When you replace the app, keep these ideas in mind:
-
-- The Dockerfile tells Docker how to package the app.
-- The Helm chart tells Kubernetes how to run the app.
-- The `.env` file gives the scripts local values such as app name, namespace, and image name.
-
-You do not need to rewrite the platform to start using it. Replace the application gradually, then run the same commands to validate it.
-
-#### 6. Deploy automatically from git push
-
-The beginner-friendly flow is:
-
-```text
-code change -> git push -> GitHub Actions -> Docker image -> ArgoCD -> Kubernetes deployment
-```
-
-Push your configured copy to `main`:
-
-```bash
-git add .
-git commit -m "configure starter kit"
-git push origin main
-```
-
-GitHub Actions will build and test the app. When DockerHub is configured, it also builds and pushes a Docker image. Then the workflow updates the Helm image values in Git. ArgoCD watches Git, sees the new desired image, and syncs it into Kubernetes.
-
-After the first successful pipeline run:
-
-```bash
-make verify
-make open-app
-```
-
-## Required Tools
+## ✅ Required Tools
 
 Primary support target: Ubuntu/Linux. Secondary target: WSL2 with Docker Desktop WSL integration enabled.
 
-If you need help installing these tools on Ubuntu, use the [Dependency Installation Guide](DEPENDENCIES.md).
-
-| Tool | Minimum expectation | Check |
+| Tool | Used for | Check |
 | --- | --- | --- |
-| Git | Installed and on PATH | `git --version` |
-| Java | 21+ | `java -version` |
-| Docker | Installed and running | `docker info` |
-| kubectl | Installed and on PATH | `kubectl version --client` |
-| Helm | Installed and on PATH | `helm version` |
-| Minikube | Installed and on PATH | `minikube version` |
+| Git | Cloning and pushing the repository | `git --version` |
+| Java 21 | Building and testing the Spring Boot app | `java -version` |
+| Docker | Building images and running Minikube's local containers | `docker info` |
+| kubectl | Talking to Kubernetes | `kubectl version --client` |
+| Helm | Packaging Kubernetes resources | `helm version` |
+| Minikube | Running Kubernetes locally | `minikube version` |
 
-Run the dependency validator any time:
+Install help: [Dependency Installation Guide](DEPENDENCIES.md)
+
+Check everything from the repository root:
 
 ```bash
 ./scripts/verify-dependencies.sh
 ```
 
-## Make Commands
+## 🔄 Architecture and CI/CD
 
-| Command | What it does |
-| --- | --- |
-| `make setup` | Full local setup: dependencies, Minikube, ArgoCD, and Application registration |
-| `make verify` | Validate Docker, Kubernetes, ArgoCD, app, optional SonarCloud config, workflow |
-| `make deploy` | Recreate or refresh the ArgoCD Application from `.env` |
-| `make minikube` | Start or verify the Minikube profile |
-| `make argocd` | Install or update ArgoCD and apply the Application |
-| `make open-app` | Print the local URL for the app service |
-| `make cleanup` | Remove app resources while keeping Minikube |
-| `make cleanup-all` | Remove app, ArgoCD, and the Minikube profile |
-| `make test` | Run Maven verification for the Spring Boot app |
-| `make docker-build` | Build the Docker image locally using `.env` values |
-| `make helm-template` | Render the Helm chart locally using `.env` values |
+The core idea is GitOps: Git stores the desired deployment state, and ArgoCD keeps Kubernetes matching it.
 
-## SonarCloud Setup
-
-SonarCloud is optional for the local demo. Enable it when you want CI quality scanning:
-
-1. Sign in to SonarCloud and import your GitHub repository.
-2. Copy the organization key and project key into `.env`.
-3. Create a SonarCloud token.
-4. Add `SONAR_TOKEN` as a GitHub secret.
-5. Add `SONAR_ORGANIZATION` and `SONAR_PROJECT_KEY` as GitHub repository variables.
-
-The workflow reads SonarCloud identity from GitHub variables, so no organization or project key is hardcoded in the pipeline.
-
-## ArgoCD Setup
-
-`make setup` installs ArgoCD into the namespace from `.env` using Kubernetes server-side apply, then applies an ArgoCD Application generated from your local configuration.
-Server-side apply keeps the official ArgoCD CRDs off the client-side last-applied annotation path, which avoids annotation-size failures on newer Kubernetes and Minikube clusters.
-
-Useful commands:
-
-```bash
-kubectl get pods -n argocd
-kubectl get applications -n argocd
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
-
-Get the initial admin password:
-
-```bash
-kubectl -n argocd get secret argocd-initial-admin-secret \
-  -o jsonpath='{.data.password}' | base64 -d && echo
-```
-
-Then open `https://localhost:8080` and log in with username `admin`.
-
-## Helm Configuration
-
-The chart works with the demo defaults and is reusable for other Spring Boot services. Key values:
-
-| Value | Purpose |
-| --- | --- |
-| `fullnameOverride` | Predictable Kubernetes resource name |
-| `namespace.name` | Target namespace |
-| `replicaCount` | Number of pods |
-| `image.repository` | Docker image repository, default `axthithya/devops-starter-kit` |
-| `image.tag` | Docker image tag |
-| `image.pullPolicy` | Kubernetes image pull policy |
-| `container.port` | Spring Boot container port |
-| `service.type` | `ClusterIP`, `NodePort`, or `LoadBalancer` |
-| `service.port` | Service port |
-| `service.nodePort` | Optional fixed NodePort |
-| `probes.*` | Readiness and liveness checks |
-| `resources` | CPU/memory requests and limits |
-
-Render locally:
-
-```bash
-make helm-template
-```
-
-## Health Checks
-
-The app exposes:
-
-```text
-GET /
-GET /health
-```
-
-The Helm chart uses `/health` for readiness and liveness probes. `make verify` also checks Docker, Kubernetes, ArgoCD, the ArgoCD Application, app deployment, service, optional SonarCloud values, and workflow presence.
+For a visual overview and simple explanations of ArgoCD, Helm, Docker image publishing, and the deployment flow, read [Architecture Overview](ARCHITECTURE.md).
 
 ## Troubleshooting
 

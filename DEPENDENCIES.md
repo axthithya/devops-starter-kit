@@ -1,12 +1,25 @@
-# Dependency Installation Guide
+# 🛠️ Dependency Installation Guide
 
 This guide helps you prepare an Ubuntu machine for the DevOps Starter Kit.
 
-Install these tools first, then return to the README and run the local demo.
+Use it if `make setup` says a required tool is missing or Docker is not running.
+
+Back to: [README](README.md) | [Quick Start](QUICKSTART.md) | [Architecture](ARCHITECTURE.md)
 
 The commands below are written for Ubuntu on 64-bit Intel/AMD machines. If you use WSL2, keep Docker Desktop running with WSL integration enabled.
 
-## Quick Check
+## What You Are Installing
+
+| Tool | Why this project needs it |
+| --- | --- |
+| Git | Clones the repository and pushes changes to GitHub |
+| Java 21 | Builds and tests the Spring Boot app |
+| Docker | Builds images and provides the local Minikube driver |
+| kubectl | Talks to Kubernetes |
+| Helm | Packages Kubernetes configuration |
+| Minikube | Runs Kubernetes locally on your machine |
+
+## ✅ Quick Check
 
 If you already have the tools installed, you can check them with:
 
@@ -66,7 +79,7 @@ java -version
 
 The version output should mention Java 21.
 
-## Docker
+## 📦 Docker
 
 Docker is used to build and run containers. Minikube also uses Docker as the local Kubernetes driver in this project.
 
@@ -114,7 +127,7 @@ docker info
 docker run hello-world
 ```
 
-## kubectl
+## ☸️ kubectl
 
 kubectl is used to talk to the local Kubernetes cluster.
 
@@ -145,6 +158,7 @@ Helm is used to package the Kubernetes deployment for the starter app.
 Install:
 
 ```bash
+sudo apt-get update
 sudo apt-get install -y curl gpg apt-transport-https
 curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
 echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
@@ -177,7 +191,7 @@ minikube version
 
 You do not need to start Minikube manually for this project. `make setup` starts the `devops-starter-kit` Minikube profile for you.
 
-## Final Verification
+## ✅ Final Verification
 
 From the repository root, run:
 
