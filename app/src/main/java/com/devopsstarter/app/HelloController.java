@@ -14,4 +14,11 @@ public class HelloController {
                 "message", "DevOps Starter Kit Running"
         );
     }
+
+    @GetMapping("/health")
+    public Map<String, String> health() {
+        return Map.of(
+                "status", "UP"
+        );
+    }
 }

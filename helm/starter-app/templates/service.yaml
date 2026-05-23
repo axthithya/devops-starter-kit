@@ -1,16 +1,19 @@
 apiVersion: v1
 kind: Service
-
 metadata:
-  name: {{ .Values.app.name }}-service
-
+  name: {{ include "starter-app.fullname" . }}
+  namespace: {{ include "starter-app.namespace" . }}
+  labels:
+    {{- include "starter-app.labels" . | nindent 4 }}
 spec:
-  type: NodePort
-
+  type: {{ .Values.service.type }}
   selector:
-    app: {{ .Values.app.name }}
-
+    {{- include "starter-app.selectorLabels" . | nindent 4 }}
   ports:
-    - port: 80
-      targetPort: 8080
-      nodePort: 30080
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}

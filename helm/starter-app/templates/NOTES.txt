@@ -1,0 +1,8 @@
+1. Check the deployment:
+   kubectl get pods -n {{ include "starter-app.namespace" . }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+2. Check the service:
+   kubectl get svc -n {{ include "starter-app.namespace" . }} {{ include "starter-app.fullname" . }}
+
+3. With Minikube:
+   minikube service {{ include "starter-app.fullname" . }} -n {{ include "starter-app.namespace" . }} --url

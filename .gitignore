@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+
+# Local/generated deployment files
+argocd/application.generated.yaml
+helm/starter-app/generated-values.yaml
+
+# IDE files commonly created at the repository root
+.idea/
+.vscode/

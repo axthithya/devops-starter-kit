@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">ArgoCD application health</title>
+  <desc id="desc">Example ArgoCD application overview showing a synced and healthy starter app.</desc>
+  <rect width="960" height="520" fill="#f6f8fa"/>
+  <rect x="54" y="46" width="852" height="428" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+  <rect x="54" y="46" width="852" height="64" rx="8" fill="#24292f"/>
+  <text x="86" y="86" fill="#f0f6fc" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">ArgoCD</text>
+  <rect x="86" y="146" width="788" height="112" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text x="118" y="189" fill="#24292f" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="700">starter-app</text>
+  <text x="118" y="224" fill="#57606a" font-family="Inter, Arial, sans-serif" font-size="17">helm/starter-app - main - automated sync</text>
+  <rect x="632" y="166" width="104" height="36" rx="18" fill="#dafbe1" stroke="#2da44e"/>
+  <text x="660" y="190" fill="#116329" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700">Synced</text>
+  <rect x="752" y="166" width="104" height="36" rx="18" fill="#dafbe1" stroke="#2da44e"/>
+  <text x="777" y="190" fill="#116329" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700">Healthy</text>
+  <rect x="86" y="294" width="244" height="116" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="112" y="334" fill="#57606a" font-family="Inter, Arial, sans-serif" font-size="16">Deployment</text>
+  <text x="112" y="374" fill="#24292f" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">1/1 ready</text>
+  <rect x="358" y="294" width="244" height="116" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="384" y="334" fill="#57606a" font-family="Inter, Arial, sans-serif" font-size="16">Service</text>
+  <text x="384" y="374" fill="#24292f" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">NodePort</text>
+  <rect x="630" y="294" width="244" height="116" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="656" y="334" fill="#57606a" font-family="Inter, Arial, sans-serif" font-size="16">Image</text>
+  <text x="656" y="374" fill="#24292f" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">latest</text>
+</svg>

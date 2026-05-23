@@ -1,0 +1,47 @@
+# Template reference only.
+# scripts/bootstrap-argocd.sh renders and applies this shape from .env values.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${ARGOCD_APP_NAME}
+  namespace: ${ARGOCD_NAMESPACE}
+spec:
+  project: ${ARGOCD_PROJECT}
+  source:
+    repoURL: ${GIT_REPO_URL}
+    targetRevision: ${GIT_TARGET_REVISION}
+    path: ${HELM_CHART_PATH}
+    helm:
+      releaseName: ${HELM_RELEASE_NAME}
+      parameters:
+        - name: fullnameOverride
+          value: ${APP_NAME}
+        - name: namespace.create
+          value: "true"
+        - name: namespace.name
+          value: ${APP_NAMESPACE}
+        - name: replicaCount
+          value: "${REPLICA_COUNT}"
+        - name: image.repository
+          value: ${DOCKERHUB_USERNAME}/${DOCKER_IMAGE_NAME}
+        - name: image.tag
+          value: ${IMAGE_TAG}
+        - name: service.type
+          value: ${SERVICE_TYPE}
+        - name: service.port
+          value: "${SERVICE_PORT}"
+        - name: service.targetPort
+          value: http
+        - name: container.port
+          value: "${CONTAINER_PORT}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ${APP_NAMESPACE}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

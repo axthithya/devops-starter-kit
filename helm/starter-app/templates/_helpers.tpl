@@ -51,6 +51,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Resolve the namespace. Helm's release namespace remains the default.
+*/}}
+{{- define "starter-app.namespace" -}}
+{{- default .Release.Namespace .Values.namespace.name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "starter-app.serviceAccountName" -}}
