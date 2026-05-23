@@ -1,7 +1,5 @@
 name: CI/CD
 
-# Pull requests run the build verification path.
-# Pushes to main also run SonarCloud, publish Docker images, and update Helm for GitOps.
 on:
   push:
     branches: [main]
@@ -12,23 +10,17 @@ on:
 jobs:
   build-test-analyze-publish:
     runs-on: ubuntu-latest
+
     permissions:
-      # Required only for the GitOps image tag update commit on main.
       contents: write
 
     env:
       APP_DIR: app
-      DOCKER_CONTEXT: app
-      HELM_VALUES_FILE: helm/starter-app/values.yaml
       JAVA_VERSION: "21"
-      SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}
-      UPDATE_HELM_IMAGE_TAG: ${{ vars.UPDATE_HELM_IMAGE_TAG || 'true' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -37,90 +29,25 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
 
-      - name: Show pipeline context
-        run: |
-          set -euo pipefail
-          echo "Repository: ${GITHUB_REPOSITORY}"
-          echo "Branch/ref: ${GITHUB_REF}"
-          echo "Application directory: ${APP_DIR}"
-          echo "Docker context: ${DOCKER_CONTEXT}"
-
       - name: Make Maven wrapper executable
-        working-directory: ${{ env.APP_DIR }}
-        run: chmod +x mvnw
+        run: chmod +x app/mvnw
 
       - name: Build and test Spring Boot app
-        working-directory: ${{ env.APP_DIR }}
-        run: ./mvnw --batch-mode --no-transfer-progress clean verify
-
-      # Main branch releases require external service credentials.
-      - name: Validate release configuration
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
-          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          set -euo pipefail
-          missing=0
-
-          require_value() {
-            local name="$1"
-            local value="$2"
-            if [ -z "$value" ]; then
-              echo "::error title=Missing CI/CD configuration::Set ${name} in GitHub repository settings."
-              missing=1
-            fi
-          }
-
-          require_value "secret DOCKER_USERNAME" "${DOCKER_USERNAME}"
-          require_value "secret DOCKER_PASSWORD" "${DOCKER_PASSWORD}"
-          require_value "secret SONAR_TOKEN" "${SONAR_TOKEN}"
-          require_value "variable SONAR_ORGANIZATION" "${SONAR_ORGANIZATION}"
-          require_value "variable SONAR_PROJECT_KEY" "${SONAR_PROJECT_KEY}"
-
-          exit "${missing}"
+          cd app
+          ./mvnw clean verify
 
       - name: SonarCloud Scan
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: ${{ env.APP_DIR }}
         env:
-          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
-          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          set -euo pipefail
-          ./mvnw --batch-mode --no-transfer-progress sonar:sonar \
-            -Dsonar.projectKey="${SONAR_PROJECT_KEY}" \
-            -Dsonar.organization="${SONAR_ORGANIZATION}" \
-            -Dsonar.host.url="${SONAR_HOST_URL}" \
-            -Dsonar.token="${SONAR_TOKEN}"
-
-      - name: Resolve Docker image
-        id: image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          DOCKERHUB_REPOSITORY: ${{ vars.DOCKERHUB_REPOSITORY }}
-          DOCKER_IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          set -euo pipefail
-          repo_name="${GITHUB_REPOSITORY##*/}"
-          image_name="${DOCKER_IMAGE_NAME:-$repo_name}"
-          image_repository="${DOCKERHUB_REPOSITORY:-${DOCKER_USERNAME}/${image_name}}"
-          short_sha="${GITHUB_SHA::12}"
-
-          echo "IMAGE_REPOSITORY=${image_repository}" >> "${GITHUB_ENV}"
-          echo "IMAGE_TAG=sha-${short_sha}" >> "${GITHUB_ENV}"
-          echo "repository=${image_repository}" >> "${GITHUB_OUTPUT}"
-          echo "tag=sha-${short_sha}" >> "${GITHUB_OUTPUT}"
-          echo "Resolved image: ${image_repository}:sha-${short_sha}"
-
-      - name: Set up Docker Buildx
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/setup-buildx-action@v3
+          cd app
+          ./mvnw sonar:sonar \
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
 
       - name: Login to DockerHub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -129,78 +56,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ env.DOCKER_CONTEXT }}
-          push: true
-          tags: |
-            ${{ steps.image.outputs.repository }}:latest
-            ${{ steps.image.outputs.repository }}:${{ steps.image.outputs.tag }}
-
-      # Updating the image tag in Git gives ArgoCD a concrete desired-state change to sync.
-      - name: Update Helm image tag for GitOps
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          GITOPS_IMAGE_REPOSITORY: ${{ steps.image.outputs.repository }}
-          GITOPS_IMAGE_TAG: ${{ steps.image.outputs.tag }}
         run: |
-          set -euo pipefail
+          docker build -t axthithya/devops-starter-kit:latest ./app
 
-          if [ "${UPDATE_HELM_IMAGE_TAG}" != "true" ]; then
-            echo "Skipping Helm image tag update because UPDATE_HELM_IMAGE_TAG=${UPDATE_HELM_IMAGE_TAG}."
-            exit 0
-          fi
-
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-
-          path = Path(os.environ["HELM_VALUES_FILE"])
-          repository = os.environ["GITOPS_IMAGE_REPOSITORY"]
-          tag = os.environ["GITOPS_IMAGE_TAG"]
-          lines = path.read_text().splitlines()
-
-          def set_section_value(section, key, value):
-              in_section = False
-              section_indent = 0
-              target_indent = 2
-
-              for index, line in enumerate(lines):
-                  stripped = line.strip()
-                  if not stripped or stripped.startswith("#"):
-                      continue
-
-                  indent = len(line) - len(line.lstrip(" "))
-
-                  if indent == 0 and stripped == f"{section}:":
-                      in_section = True
-                      section_indent = indent
-                      target_indent = section_indent + 2
-                      continue
-
-                  if in_section and indent <= section_indent and stripped.endswith(":"):
-                      break
-
-                  if in_section and indent == target_indent and stripped.startswith(f"{key}:"):
-                      lines[index] = f"{' ' * target_indent}{key}: {value}"
-                      return
-
-              raise SystemExit(f"Could not find {section}.{key} in {path}")
-
-          set_section_value("image", "repository", repository)
-          set_section_value("image", "tag", tag)
-          path.write_text("\n".join(lines) + "\n")
-          PY
-
-          if git diff --quiet -- "${HELM_VALUES_FILE}"; then
-            echo "Helm image values already match ${GITOPS_IMAGE_REPOSITORY}:${GITOPS_IMAGE_TAG}."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "${HELM_VALUES_FILE}"
-          git commit -m "chore(gitops): update image to ${GITOPS_IMAGE_TAG} [skip ci]"
-          git push
+      - name: Push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker push axthithya/devops-starter-kit:latest
