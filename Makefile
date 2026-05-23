@@ -33,8 +33,23 @@ open-app: ## Print the local Minikube URL for the deployed app
 test: ## Run the Spring Boot test/build verification
 	@cd app && ./mvnw --batch-mode --no-transfer-progress clean verify
 
-docker-build: ## Build the app image locally using values from .env when present
-	@source ./scripts/lib/common.sh && load_env_if_present && docker build -t "$$(resolve_image_repository):$${IMAGE_TAG:-latest}" ./app
+docker-build: ## Build the app image locally using .env values
+	@source ./scripts/lib/common.sh && ensure_env_file && load_env_if_present && docker build -t "$$(resolve_image_repository):$${IMAGE_TAG:-latest}" ./app
 
-helm-template: ## Render the Helm chart locally
-	@source ./scripts/lib/common.sh && load_env_if_present && helm template "$${HELM_RELEASE_NAME:-starter-app}" helm/starter-app --namespace "$${APP_NAMESPACE:-starter-app}"
+helm-template: ## Render the Helm chart locally using .env values
+	@source ./scripts/lib/common.sh && \
+	ensure_env_file && \
+	load_env_if_present && \
+	IMAGE_REPOSITORY="$$(resolve_image_repository)" && \
+	helm template "$${HELM_RELEASE_NAME:-starter-app}" helm/starter-app \
+		--namespace "$${APP_NAMESPACE:-starter-app}" \
+		--set fullnameOverride="$${APP_NAME:-starter-app}" \
+		--set namespace.name="$${APP_NAMESPACE:-starter-app}" \
+		--set replicaCount="$${REPLICA_COUNT:-1}" \
+		--set image.repository="$${IMAGE_REPOSITORY}" \
+		--set image.tag="$${IMAGE_TAG:-latest}" \
+		--set service.type="$${SERVICE_TYPE:-NodePort}" \
+		--set service.port="$${SERVICE_PORT:-80}" \
+		--set service.targetPort=http \
+		--set container.port="$${CONTAINER_PORT:-8080}" \
+		$${NODE_PORT:+--set service.nodePort=$${NODE_PORT}}

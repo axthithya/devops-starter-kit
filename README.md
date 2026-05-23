@@ -220,7 +220,8 @@ Run the dependency validator any time:
 | `make cleanup` | Remove app resources while keeping Minikube |
 | `make cleanup-all` | Remove app, ArgoCD, and the Minikube profile |
 | `make test` | Run Maven verification for the Spring Boot app |
-| `make helm-template` | Render the Helm chart locally |
+| `make docker-build` | Build the Docker image locally using `.env` values |
+| `make helm-template` | Render the Helm chart locally using `.env` values |
 
 ## SonarCloud Setup
 
