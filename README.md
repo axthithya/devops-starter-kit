@@ -84,7 +84,8 @@ There are two phases:
 1. **Phase 1 validates the platform locally.** This proves your machine can run Docker, Kubernetes, ArgoCD, Helm, and the demo app together.
 2. **Phase 2 connects your own accounts and application.** This turns the starter kit into your own CI/CD and GitOps workflow.
 
-If your system does not already have the required DevOps tools installed, follow the [Dependency Installation Guide](DEPENDENCIES.md) first.
+If your system does not already have the required DevOps tools installed, 
+follow the [Dependency Installation Guide](DEPENDENCIES.md) first.
 
 ### Phase 1: Local Demo / Platform Validation
 
