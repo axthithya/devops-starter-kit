@@ -11,7 +11,7 @@ public class HelloController {
     @GetMapping("/")
     public Map<String, String> home() {
         return Map.of(
-                "message", "DevOps Starter Kit Running"
+                "message", "CI/CD pipeline test success!"
         );
     }
 
