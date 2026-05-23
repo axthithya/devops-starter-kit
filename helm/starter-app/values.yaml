@@ -1,0 +1,6 @@
+app:
+  name: starter-app
+
+image:
+  repository: axthithya/devops-starter-kit
+  tag: latest

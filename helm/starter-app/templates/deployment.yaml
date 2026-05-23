@@ -2,25 +2,24 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: starter-app
+  name: {{ .Values.app.name }}
 
 spec:
   replicas: 1
 
   selector:
     matchLabels:
-      app: starter-app
+      app: {{ .Values.app.name }}
 
   template:
     metadata:
       labels:
-        app: starter-app
+        app: {{ .Values.app.name }}
 
     spec:
       containers:
-        - name: starter-app
-          image: axthithya/devops-starter-kit:v1
-          imagePullPolicy: Always
+        - name: {{ .Values.app.name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 
           ports:
             - containerPort: 8080
