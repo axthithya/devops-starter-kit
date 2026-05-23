@@ -25,3 +25,4 @@ A complete beginner-friendly DevOps project using:
 - Minikube
 - GitHub Actions..
 Updated SonarCloud integration
+Fixed SonarCloud authentication
