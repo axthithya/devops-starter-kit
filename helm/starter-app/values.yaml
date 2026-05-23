@@ -9,7 +9,7 @@ namespace:
 
 image:
   repository: axthithya/devops-starter-kit
-  tag: 87b635b
+  tag: 51454c1
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
