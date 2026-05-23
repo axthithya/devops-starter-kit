@@ -29,7 +29,7 @@ APPLICATION_MANIFEST="${PROJECT_ROOT}/argocd/application.generated.yaml"
 
 info "Installing or updating ArgoCD in namespace ${ARGOCD_NAMESPACE}"
 kubectl_apply_namespace "${ARGOCD_NAMESPACE}"
-kubectl apply -n "${ARGOCD_NAMESPACE}" -f "${ARGOCD_INSTALL_MANIFEST}"
+kubectl apply -n "${ARGOCD_NAMESPACE}" --server-side --force-conflicts -f "${ARGOCD_INSTALL_MANIFEST}"
 
 info "Waiting for ArgoCD workloads"
 kubectl rollout status deployment --all -n "${ARGOCD_NAMESPACE}" --timeout=300s

@@ -237,7 +237,8 @@ The workflow reads SonarCloud identity from GitHub variables, so no organization
 
 ## ArgoCD Setup
 
-`make setup` installs ArgoCD into the namespace from `.env` and applies an ArgoCD Application generated from your local configuration.
+`make setup` installs ArgoCD into the namespace from `.env` using Kubernetes server-side apply, then applies an ArgoCD Application generated from your local configuration.
+Server-side apply keeps the official ArgoCD CRDs off the client-side last-applied annotation path, which avoids annotation-size failures on newer Kubernetes and Minikube clusters.
 
 Useful commands:
 
