@@ -32,7 +32,22 @@ kubectl_apply_namespace "${ARGOCD_NAMESPACE}"
 kubectl apply -n "${ARGOCD_NAMESPACE}" --server-side --force-conflicts -f "${ARGOCD_INSTALL_MANIFEST}"
 
 info "Waiting for ArgoCD workloads"
-kubectl rollout status deployment --all -n "${ARGOCD_NAMESPACE}" --timeout=300s
+argocd_rollout_count=0
+
+for workload_kind in deployment statefulset; do
+  mapfile -t argocd_workloads < <(
+    kubectl get "${workload_kind}" -n "${ARGOCD_NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+  )
+
+  for workload_name in "${argocd_workloads[@]}"; do
+    argocd_rollout_count=$((argocd_rollout_count + 1))
+    kubectl rollout status "${workload_kind}/${workload_name}" -n "${ARGOCD_NAMESPACE}" --timeout=300s
+  done
+done
+
+if [ "${argocd_rollout_count}" -eq 0 ]; then
+  die "No ArgoCD rollout workloads found in namespace ${ARGOCD_NAMESPACE}."
+fi
 
 info "Rendering ArgoCD Application for ${ARGOCD_APP_NAME}"
 mkdir -p "$(dirname "${APPLICATION_MANIFEST}")"
