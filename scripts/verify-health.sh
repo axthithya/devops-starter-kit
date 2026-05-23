@@ -55,8 +55,7 @@ check_ok "Application service exists" kubectl get service "${APP_NAME:-starter-a
 
 info "Checking repository configuration"
 if is_placeholder_value "${SONAR_ORGANIZATION:-}" || is_placeholder_value "${SONAR_PROJECT_KEY:-}"; then
-  error "SonarCloud values are still placeholders in ${ENV_FILE}."
-  record_failure
+  warn "SonarCloud values are still placeholders in ${ENV_FILE}; local verification can continue."
 else
   success "SonarCloud project values are configured locally"
 fi

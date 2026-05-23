@@ -41,27 +41,97 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
         run: |
+          if [ -z "${SONAR_TOKEN}" ] || [ -z "${SONAR_ORGANIZATION}" ] || [ -z "${SONAR_PROJECT_KEY}" ]; then
+            echo "::warning::Skipping SonarCloud scan because SONAR_TOKEN, SONAR_ORGANIZATION, or SONAR_PROJECT_KEY is not configured."
+            exit 0
+          fi
+
+          if [ -z "${SONAR_HOST_URL}" ]; then
+            SONAR_HOST_URL="https://sonarcloud.io"
+          fi
+
           cd app
           ./mvnw sonar:sonar \
-            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
-            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.projectKey="${SONAR_PROJECT_KEY}" \
+            -Dsonar.organization="${SONAR_ORGANIZATION}" \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.login="${SONAR_TOKEN}"
+
+      - name: Prepare Docker image metadata
+        id: docker-meta
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME }}
+          DOCKERHUB_REPOSITORY: ${{ vars.DOCKERHUB_REPOSITORY }}
+        run: |
+          if [ -z "${DOCKER_USERNAME}" ] || [ -z "${DOCKER_PASSWORD}" ]; then
+            echo "::warning::Skipping Docker publish because DOCKER_USERNAME or DOCKER_PASSWORD is not configured."
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [ -z "${DOCKER_IMAGE_NAME}" ]; then
+            DOCKER_IMAGE_NAME="devops-starter-kit"
+          fi
+
+          if [ -n "${DOCKERHUB_REPOSITORY}" ]; then
+            image_repository="${DOCKERHUB_REPOSITORY}"
+          else
+            image_repository="${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}"
+          fi
+
+          image_tag="${GITHUB_SHA::7}"
+          echo "publish=true" >> "${GITHUB_OUTPUT}"
+          echo "IMAGE_REPOSITORY=${image_repository}" >> "${GITHUB_ENV}"
+          echo "IMAGE_TAG=${image_tag}" >> "${GITHUB_ENV}"
 
       - name: Login to DockerHub
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.docker-meta.outputs.publish == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.docker-meta.outputs.publish == 'true'
         run: |
-          docker build -t axthithya/devops-starter-kit:latest ./app
+          docker build \
+            -t "${IMAGE_REPOSITORY}:${IMAGE_TAG}" \
+            -t "${IMAGE_REPOSITORY}:latest" \
+            ./app
 
       - name: Push Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.docker-meta.outputs.publish == 'true'
         run: |
-          docker push axthithya/devops-starter-kit:latest
+          docker push "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+          docker push "${IMAGE_REPOSITORY}:latest"
+
+      - name: Update Helm image values for GitOps
+        if: steps.docker-meta.outputs.publish == 'true'
+        env:
+          UPDATE_HELM_IMAGE_TAG: ${{ vars.UPDATE_HELM_IMAGE_TAG }}
+        run: |
+          if [ "${UPDATE_HELM_IMAGE_TAG:-true}" = "false" ]; then
+            echo "Skipping Helm values update because UPDATE_HELM_IMAGE_TAG=false."
+            exit 0
+          fi
+
+          sed -i "s|^  repository: .*|  repository: ${IMAGE_REPOSITORY}|" helm/starter-app/values.yaml
+          sed -i "s|^  tag: .*|  tag: ${IMAGE_TAG}|" helm/starter-app/values.yaml
+
+          if git diff --quiet -- helm/starter-app/values.yaml; then
+            echo "Helm values already point at this image."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add helm/starter-app/values.yaml
+          git commit -m "chore: update Helm image tag [skip ci]"
+          git push

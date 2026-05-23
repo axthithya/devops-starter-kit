@@ -59,7 +59,7 @@ if command_exists docker; then
     success "Docker daemon is running"
   else
     error "Docker is installed but the daemon is not reachable."
-    printf "Start Docker, then rerun: make verify\n" >&2
+    printf "Start Docker, then rerun the command you were trying, for example: make setup\n" >&2
     failures=$((failures + 1))
   fi
 fi

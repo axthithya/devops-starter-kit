@@ -12,7 +12,6 @@ require_env_vars \
   ARGOCD_APP_NAME \
   ARGOCD_PROJECT \
   ARGOCD_INSTALL_MANIFEST \
-  GIT_REPO_URL \
   GIT_TARGET_REVISION \
   HELM_CHART_PATH \
   HELM_RELEASE_NAME \
@@ -24,6 +23,7 @@ require_env_vars \
   CONTAINER_PORT \
   REPLICA_COUNT
 
+GIT_REPOSITORY_URL="$(resolve_git_repo_url)"
 IMAGE_REPOSITORY="$(resolve_image_repository)"
 APPLICATION_MANIFEST="${PROJECT_ROOT}/argocd/application.generated.yaml"
 
@@ -45,7 +45,7 @@ metadata:
 spec:
   project: ${ARGOCD_PROJECT}
   source:
-    repoURL: ${GIT_REPO_URL}
+    repoURL: ${GIT_REPOSITORY_URL}
     targetRevision: ${GIT_TARGET_REVISION}
     path: ${HELM_CHART_PATH}
     helm:

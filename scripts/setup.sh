@@ -9,7 +9,6 @@ load_env_if_present
 require_env_vars \
   APP_NAME \
   APP_NAMESPACE \
-  GIT_REPO_URL \
   GIT_TARGET_REVISION \
   HELM_CHART_PATH \
   HELM_RELEASE_NAME \
@@ -27,11 +26,14 @@ if is_placeholder_value "${SONAR_ORGANIZATION:-}" || is_placeholder_value "${SON
   warn "SonarCloud values are still placeholders. Local setup can continue, but CI will require real SonarCloud values."
 fi
 
+resolve_git_repo_url >/dev/null
+resolve_image_repository >/dev/null
+
 info "Starting DevOps Starter Kit setup"
 "${PROJECT_ROOT}/scripts/verify-dependencies.sh"
 "${PROJECT_ROOT}/scripts/bootstrap-minikube.sh"
 "${PROJECT_ROOT}/scripts/bootstrap-argocd.sh"
 
 success "Setup completed"
-info "Next: add the GitHub repository secrets and variables listed in README.md, then push to main."
-info "After the first successful pipeline run, use make verify to check the deployed app."
+info "Next: run make verify, then make open-app."
+info "When you are ready for your own CI/CD, add the GitHub secrets and variables listed in README.md."

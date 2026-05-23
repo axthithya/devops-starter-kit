@@ -8,7 +8,7 @@ namespace:
   name: ""
 
 image:
-  repository: your-dockerhub-username/devops-starter-kit
+  repository: axthithya/devops-starter-kit
   tag: latest
   pullPolicy: IfNotPresent
 

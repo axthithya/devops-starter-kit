@@ -1,4 +1,4 @@
-# Template reference only.
+# Reference only.
 # scripts/bootstrap-argocd.sh renders and applies this shape from .env values.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -8,7 +8,7 @@ metadata:
 spec:
   project: ${ARGOCD_PROJECT}
   source:
-    repoURL: ${GIT_REPO_URL}
+    repoURL: ${GIT_REPOSITORY_URL}
     targetRevision: ${GIT_TARGET_REVISION}
     path: ${HELM_CHART_PATH}
     helm:
@@ -23,7 +23,7 @@ spec:
         - name: replicaCount
           value: "${REPLICA_COUNT}"
         - name: image.repository
-          value: ${DOCKERHUB_USERNAME}/${DOCKER_IMAGE_NAME}
+          value: ${IMAGE_REPOSITORY}
         - name: image.tag
           value: ${IMAGE_TAG}
         - name: service.type

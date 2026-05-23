@@ -53,7 +53,7 @@ ensure_env_file() {
   if [ ! -f "${ENV_FILE}" ]; then
     cp "${PROJECT_ROOT}/.env.example" "${ENV_FILE}"
     warn "Created ${ENV_FILE} from .env.example."
-    die "Edit ${ENV_FILE} with your GitHub, DockerHub, and SonarCloud values, then rerun the command."
+    info "Using demo defaults. Edit ${ENV_FILE} later when you are ready to use your own repo, image, or SonarCloud project."
   fi
 }
 
@@ -98,8 +98,37 @@ require_env_vars() {
   fi
 }
 
+resolve_git_repo_url() {
+  local value="${GIT_REPO_URL:-}"
+
+  if ! is_placeholder_value "${value}"; then
+    printf "%s" "${value}"
+    return 0
+  fi
+
+  if command_exists git; then
+    value="$(git -C "${PROJECT_ROOT}" remote get-url origin 2>/dev/null || true)"
+    if [ -n "${value}" ]; then
+      case "${value}" in
+        git@github.com:*)
+          value="https://github.com/${value#git@github.com:}"
+          ;;
+      esac
+
+      printf "%s" "${value}"
+      return 0
+    fi
+  fi
+
+  die "Set GIT_REPO_URL in ${ENV_FILE}, or clone the repository with git so the origin remote is available."
+}
+
 resolve_image_repository() {
   if [ -n "${IMAGE_REPOSITORY:-}" ]; then
+    if is_placeholder_value "${IMAGE_REPOSITORY}"; then
+      die "Set IMAGE_REPOSITORY in ${ENV_FILE}, or leave it blank to use DOCKERHUB_USERNAME/DOCKER_IMAGE_NAME."
+    fi
+
     printf "%s" "${IMAGE_REPOSITORY}"
     return 0
   fi
