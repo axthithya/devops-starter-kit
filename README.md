@@ -8,17 +8,20 @@
 
 A production-inspired DevOps starter platform for Spring Boot applications. It gives you a working path from local development to container build, quality scan, DockerHub publish, Helm deployment, and ArgoCD GitOps sync on Kubernetes.
 
-The goal is a beginner-friendly workflow:
+The goal is to make the DevOps path visible without asking you to understand every tool on day one.
+
+The fastest local demo path is:
 
 ```text
 git clone https://github.com/axthithya/devops-starter-kit.git
 cd devops-starter-kit
 cp .env.example .env
 make setup
+make verify
 make open-app
 ```
 
-Clone this repository directly. You do not need to create a GitHub template or another repository before trying the starter kit locally.
+For the first run, clone this repository directly. You do not need to create a new GitHub repository, DockerHub image, or SonarCloud project before trying the starter kit locally. The demo image and default configuration are enough to validate the platform.
 
 ## Architecture
 
@@ -69,15 +72,33 @@ flowchart LR
 |-- docs/screenshots/       # README visual assets
 |-- .github/workflows/      # GitHub Actions pipeline
 |-- .env.example            # Copyable local configuration with runnable demo defaults
+|-- DEPENDENCIES.md         # Ubuntu dependency installation guide
 |-- Makefile                # Beginner-friendly command surface
 `-- README.md
 ```
 
 ## Quickstart
 
-This path is for a new user who wants the fastest working result. You need Git, Java 21, Docker, kubectl, Helm, and Minikube installed; `make setup` checks them before it changes your cluster.
+There are two phases:
 
-### 1. Clone this repository
+1. **Phase 1 validates the platform locally.** This proves your machine can run Docker, Kubernetes, ArgoCD, Helm, and the demo app together.
+2. **Phase 2 connects your own accounts and application.** This turns the starter kit into your own CI/CD and GitOps workflow.
+
+If your system does not already have the required DevOps tools installed, follow the [Dependency Installation Guide](DEPENDENCIES.md) first.
+
+### Phase 1: Local Demo / Platform Validation
+
+Use this phase when you are trying the project for the first time.
+
+This phase is mainly to:
+
+- Validate the DevOps platform.
+- Verify your local machine can run the required tools.
+- Prove that Kubernetes, ArgoCD, Helm, and GitOps can work together.
+
+No account customization is needed yet. You can leave the demo Docker image, app name, namespace, and SonarCloud placeholders as they are.
+
+#### 1. Clone this repository
 
 ```bash
 git clone https://github.com/axthithya/devops-starter-kit.git
@@ -85,7 +106,7 @@ cd devops-starter-kit
 cp .env.example .env
 ```
 
-For a first local demo, you can leave `.env` unchanged. The scripts use your clone's `origin` remote for ArgoCD and the public demo image for Kubernetes:
+The `.env` file is your local settings file. For the first local demo, leave it unchanged. The scripts use your clone's `origin` remote for ArgoCD and the public demo image for Kubernetes:
 
 ```bash
 GIT_REPO_URL=
@@ -95,15 +116,21 @@ APP_NAME=starter-app
 APP_NAMESPACE=starter-app
 ```
 
-Only edit `.env` now if you already know your own DockerHub, GitHub, app, namespace, or SonarCloud values. SonarCloud placeholders are allowed for local setup and only matter when you enable CI quality scanning.
+Only edit `.env` now if you already know your own DockerHub, GitHub, app, namespace, or SonarCloud values. SonarCloud placeholders are allowed for local setup and only matter when you enable CI quality scanning later.
 
-### 2. Run setup
+#### 2. Prepare the local platform
 
 ```bash
 make setup
 ```
 
-This verifies tools, starts the `devops-starter-kit` Minikube profile, creates namespaces, installs ArgoCD, and registers the app. A successful run ends like this:
+- What it does: Automatically prepares a local Kubernetes environment on your machine.
+- Why you run it: This creates the local DevOps stack so you do not have to install ArgoCD or register the app by hand.
+- What happens on your machine: It checks your tools, starts the `devops-starter-kit` Minikube profile, creates Kubernetes namespaces, installs ArgoCD, and registers the starter app.
+- What success means: The command finishes with `OK  Setup completed`.
+- What you learn/prove: Your machine can start the local Kubernetes platform and connect the starter app to ArgoCD.
+
+A successful run ends like this:
 
 ```text
 OK  Setup completed
@@ -111,16 +138,37 @@ OK  Setup completed
 
 ArgoCD may need a minute or two to sync the app after setup finishes.
 
-### 3. Verify and open the app
+#### 3. Verify and open the demo app
 
 ```bash
 make verify
+```
+
+- What it does: Checks whether the local DevOps stack is healthy.
+- Why you run it: This helps verify your system can run the DevOps stack correctly after setup.
+- What happens on your machine: It checks Docker, Kubernetes, ArgoCD, the ArgoCD Application, the app deployment, the app service, and the workflow file.
+- What success means: The command finishes with `OK  All health checks passed`.
+- What you learn/prove: If this succeeds, your Docker, Kubernetes, ArgoCD, and GitOps setup is healthy.
+
+If ArgoCD is still syncing, wait a minute and run `make verify` again.
+
+```bash
 make open-app
 ```
 
-`make open-app` prints the local URL for the NodePort service. Open that URL in your browser, or test it with `curl`.
+- What it does: Prints the local URL for the running demo app.
+- Why you run it: This gives you the browser link for the application that Kubernetes is running.
+- What happens on your machine: It asks Minikube for the app service URL. If Minikube cannot print one automatically, it shows a `kubectl port-forward` fallback command.
+- What success means: You see an `Application URL`, and opening it shows the starter app response.
+- What you learn/prove: Traffic can reach the app through the local Kubernetes service.
 
-### 4. Use your own repository and DockerHub image
+At this point, Phase 1 is complete. You have proved that the local DevOps platform works before adding any personal accounts.
+
+### Phase 2: Use the Platform for Your Own Application
+
+Use this phase when you are ready to connect your own repository, publish your own Docker image, and deploy your own app changes from Git.
+
+#### 4. Connect your own accounts
 
 The starter kit is directly usable from this clone, but external users cannot push to the original `axthithya/devops-starter-kit` repository. When you are ready to run CI/CD for your own copy, create a GitHub repository or fork, then point your local clone and `.env` at it:
 
@@ -144,7 +192,14 @@ Run this after changing `.env` so ArgoCD watches your repository and image:
 make deploy
 ```
 
-### 5. Add GitHub CI/CD configuration
+Account setup is what turns the local demo into your own pipeline:
+
+| Account or setting | What it enables |
+| --- | --- |
+| GitHub repository | Gives GitHub Actions a place to run CI/CD for your code |
+| GitHub Secrets | Stores private tokens safely for the workflow |
+| DockerHub | Stores the Docker image that Kubernetes will run |
+| SonarCloud | Adds optional code quality scanning |
 
 In GitHub, open `Settings -> Secrets and variables -> Actions`.
 
@@ -152,11 +207,11 @@ Also open `Settings -> Actions -> General -> Workflow permissions` and select `R
 
 Add these repository secrets:
 
-| Secret | Purpose |
+| Secret | What it enables |
 | --- | --- |
-| `DOCKER_USERNAME` | DockerHub username |
-| `DOCKER_PASSWORD` | DockerHub access token or password |
-| `SONAR_TOKEN` | SonarCloud token, required only when using SonarCloud |
+| `DOCKER_USERNAME` | Lets GitHub Actions sign in to DockerHub |
+| `DOCKER_PASSWORD` | Lets GitHub Actions publish your Docker image |
+| `SONAR_TOKEN` | Lets GitHub Actions run SonarCloud analysis, only if you use SonarCloud |
 
 Add these repository variables:
 
@@ -171,7 +226,27 @@ Add these repository variables:
 
 If DockerHub secrets are missing, CI still builds and tests the app but skips Docker publish and GitOps tag updates. If SonarCloud values are missing, CI skips the SonarCloud scan with a warning.
 
-### 6. Push to main
+#### 5. Replace the demo app with your own app
+
+The starter application lives in `app/`. You can keep it while learning the platform, then replace it later with your own Spring Boot application.
+
+When you replace the app, keep these ideas in mind:
+
+- The Dockerfile tells Docker how to package the app.
+- The Helm chart tells Kubernetes how to run the app.
+- The `.env` file gives the scripts local values such as app name, namespace, and image name.
+
+You do not need to rewrite the platform to start using it. Replace the application gradually, then run the same commands to validate it.
+
+#### 6. Deploy automatically from git push
+
+The beginner-friendly flow is:
+
+```text
+code change -> git push -> GitHub Actions -> Docker image -> ArgoCD -> Kubernetes deployment
+```
+
+Push your configured copy to `main`:
 
 ```bash
 git add .
@@ -179,7 +254,7 @@ git commit -m "configure starter kit"
 git push origin main
 ```
 
-GitHub Actions will build and test the app. When DockerHub is configured, it also builds and pushes Docker images, updates the Helm image repository/tag, and lets ArgoCD sync the new image into Kubernetes.
+GitHub Actions will build and test the app. When DockerHub is configured, it also builds and pushes a Docker image. Then the workflow updates the Helm image values in Git. ArgoCD watches Git, sees the new desired image, and syncs it into Kubernetes.
 
 After the first successful pipeline run:
 
@@ -188,9 +263,11 @@ make verify
 make open-app
 ```
 
-## Prerequisites
+## Required Tools
 
 Primary support target: Ubuntu/Linux. Secondary target: WSL2 with Docker Desktop WSL integration enabled.
+
+If you need help installing these tools on Ubuntu, use the [Dependency Installation Guide](DEPENDENCIES.md).
 
 | Tool | Minimum expectation | Check |
 | --- | --- | --- |
