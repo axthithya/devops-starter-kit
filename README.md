@@ -1,4 +1,4 @@
-![DevOps Starter Kit Workflow](docs/screenshots/devops-starter-kit-workflow.svg)
+![DevOps Starter Kit Workflow](app/src/public/Pasted%20image.png)
 
 # DevOps Starter Kit
 
