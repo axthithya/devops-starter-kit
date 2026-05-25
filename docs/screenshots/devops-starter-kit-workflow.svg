@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366 768" role="img" aria-labelledby="title desc">
+  <title id="title">DevOps Starter Kit Workflow</title>
+  <desc id="desc">Code change to GitOps deployment flowchart.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f7f9fc"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/>
+    </marker>
+    <style>
+      .title { font-family: Arial, Helvetica, sans-serif; fill: #0b1533; font-weight: 800; }
+      .subtitle { font-family: Arial, Helvetica, sans-serif; fill: #5b6475; font-weight: 600; }
+      .label { font-family: Arial, Helvetica, sans-serif; fill: #111827; }
+      .box { fill: #ffffff; stroke: #9aa5b4; stroke-width: 1.5; }
+      .arrow { fill: none; stroke: #6b7280; stroke-width: 2.4; marker-end: url(#arrow); stroke-linecap: round; stroke-linejoin: round; }
+      .dashed { fill: none; stroke: #6b7280; stroke-width: 2.2; stroke-dasharray: 8 7; marker-end: url(#arrow); stroke-linecap: round; stroke-linejoin: round; }
+      .trunk { fill: none; stroke: #6b7280; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1366" height="768" fill="url(#bg)"/>
+
+  <text x="683" y="72" text-anchor="middle" class="title" font-size="58">DevOps Starter Kit Workflow</text>
+  <text x="683" y="112" text-anchor="middle" class="subtitle" font-size="24">Code change to GitOps deployment</text>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="24" y="252" width="132" height="178" rx="15"/>
+    <circle cx="57" cy="341" r="23" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="57" y="348" text-anchor="middle" class="label" font-size="16" font-weight="700" fill="#1d4ed8">DEV</text>
+    <text x="92" y="349" class="label" font-size="18" font-weight="700">Developer</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="196" y="252" width="148" height="178" rx="15"/>
+    <circle cx="229" cy="341" r="23" fill="#111827"/>
+    <text x="229" y="348" text-anchor="middle" class="label" font-size="15" font-weight="700" fill="#ffffff">GH</text>
+    <text x="264" y="337" class="label" font-size="18" font-weight="700">GitHub</text>
+    <text x="264" y="360" class="label" font-size="17" font-weight="600">Repository</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="382" y="252" width="146" height="178" rx="15"/>
+    <circle cx="415" cy="341" r="23" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="415" y="348" text-anchor="middle" class="label" font-size="15" font-weight="700" fill="#1d4ed8">CI</text>
+    <text x="450" y="337" class="label" font-size="18" font-weight="700">GitHub</text>
+    <text x="450" y="360" class="label" font-size="17" font-weight="600">Actions</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="620" y="140" width="226" height="81" rx="15"/>
+    <circle cx="653" cy="181" r="22" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+    <text x="653" y="188" text-anchor="middle" class="label" font-size="16" font-weight="700" fill="#ea580c">M</text>
+    <text x="688" y="175" class="label" font-size="18" font-weight="700">Maven</text>
+    <text x="688" y="197" class="label" font-size="16" font-weight="600">Build &amp; Tests</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="620" y="240" width="226" height="81" rx="15"/>
+    <circle cx="653" cy="281" r="22" fill="#e0f2fe" stroke="#2563eb" stroke-width="2"/>
+    <text x="653" y="288" text-anchor="middle" class="label" font-size="14" font-weight="700" fill="#2563eb">SC</text>
+    <text x="688" y="275" class="label" font-size="18" font-weight="700">SonarCloud</text>
+    <text x="688" y="297" class="label" font-size="15" font-weight="600">Analysis (optional)</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="620" y="340" width="226" height="81" rx="15"/>
+    <circle cx="653" cy="381" r="22" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="653" y="388" text-anchor="middle" class="label" font-size="16" font-weight="700" fill="#1d4ed8">D</text>
+    <text x="688" y="375" class="label" font-size="18" font-weight="700">Docker</text>
+    <text x="688" y="397" class="label" font-size="16" font-weight="600">Image Build</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="620" y="440" width="226" height="81" rx="15"/>
+    <circle cx="653" cy="481" r="22" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+    <text x="653" y="488" text-anchor="middle" class="label" font-size="14" font-weight="700" fill="#ea580c">H</text>
+    <text x="688" y="475" class="label" font-size="18" font-weight="700">Update Helm</text>
+    <text x="688" y="497" class="label" font-size="16" font-weight="600">Image Tag</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="886" y="332" width="208" height="81" rx="15"/>
+    <circle cx="919" cy="373" r="22" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="919" y="380" text-anchor="middle" class="label" font-size="14" font-weight="700" fill="#1d4ed8">DH</text>
+    <text x="954" y="377" class="label" font-size="18" font-weight="700">DockerHub</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="520" y="590" width="164" height="150" rx="15"/>
+    <circle cx="553" cy="665" r="23" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+    <text x="553" y="672" text-anchor="middle" class="label" font-size="15" font-weight="700" fill="#ea580c">A</text>
+    <text x="588" y="670" class="label" font-size="18" font-weight="700">ArgoCD</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="760" y="590" width="164" height="150" rx="15"/>
+    <circle cx="793" cy="665" r="23" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="793" y="672" text-anchor="middle" class="label" font-size="15" font-weight="700" fill="#1d4ed8">H</text>
+    <text x="828" y="670" class="label" font-size="18" font-weight="700">Helm Chart</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="992" y="590" width="164" height="150" rx="15"/>
+    <circle cx="1025" cy="665" r="23" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="1025" y="672" text-anchor="middle" class="label" font-size="14" font-weight="700" fill="#1d4ed8">K8s</text>
+    <text x="1060" y="660" class="label" font-size="16" font-weight="700">Kubernetes /</text>
+    <text x="1060" y="682" class="label" font-size="16" font-weight="700">Minikube</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box" x="1200" y="590" width="150" height="150" rx="15"/>
+    <circle cx="1233" cy="665" r="23" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+    <text x="1233" y="672" text-anchor="middle" class="label" font-size="14" font-weight="700" fill="#15803d">SB</text>
+    <text x="1268" y="660" class="label" font-size="16" font-weight="700">Spring Boot</text>
+    <text x="1268" y="682" class="label" font-size="16" font-weight="700">App</text>
+  </g>
+
+  <path class="arrow" d="M 156 341 H 196"/>
+  <path class="arrow" d="M 344 341 H 382"/>
+
+  <path class="arrow" d="M 528 341 H 566 V 180"/>
+  <path class="trunk" d="M 566 180 V 480"/>
+  <path class="arrow" d="M 566 180 H 620"/>
+  <path class="arrow" d="M 566 280 H 620"/>
+  <path class="arrow" d="M 566 380 H 620"/>
+  <path class="arrow" d="M 566 480 H 620"/>
+
+  <path class="arrow" d="M 846 380 H 886"/>
+  <path class="arrow" d="M 991 413 V 560 H 1074 V 590"/>
+
+  <path class="dashed" d="M 270 430 V 640 H 520 V 665"/>
+  <text x="372" y="620" text-anchor="middle" class="label" font-size="16" font-weight="600" fill="#4b5563">watches Git</text>
+
+  <path class="arrow" d="M 733 521 V 548 H 270 V 430"/>
+
+  <path class="arrow" d="M 684 665 H 760"/>
+  <path class="arrow" d="M 924 665 H 992"/>
+  <path class="arrow" d="M 1156 665 H 1200"/>
+</svg>

@@ -1,3 +1,5 @@
+![DevOps Starter Kit Workflow](docs/screenshots/devops-starter-kit-workflow.svg)
+
 # DevOps Starter Kit
 
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088ff)
