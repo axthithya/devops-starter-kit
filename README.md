@@ -8,6 +8,8 @@
 ![GitOps](https://img.shields.io/badge/GitOps-ArgoCD-ef7b4d)
 ![Quality](https://img.shields.io/badge/Quality-SonarCloud-4e9bcd)
 
+DevOps starter kit for Spring Boot with Docker, Kubernetes, Helm, Minikube, ArgoCD, GitHub Actions, and optional SonarCloud.
+
 A beginner-friendly DevOps starter platform for Spring Boot applications.
 
 It shows the full path from code to container image to Kubernetes deployment using GitHub Actions, DockerHub, Helm, ArgoCD, and Minikube. You can first run the demo exactly as-is, then connect your own accounts and application when you are ready.
