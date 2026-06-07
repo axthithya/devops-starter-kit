@@ -1,5 +1,7 @@
 # Quick Start Guide
 
+DevOps starter kit for Spring Boot with Docker, Kubernetes, Helm, Minikube, ArgoCD, GitHub Actions, and optional SonarCloud.
+
 This guide walks through the same setup as the README, but with a little more context.
 
 Use it if this is your first time running the project or if you want to understand what each command is proving.
